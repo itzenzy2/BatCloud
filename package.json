@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "dependencies": {
     "bcryptjs": "^2.4.3",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "googleapis": "^128.0.0",
+    "formidable": "^3.5.1",
+    "uuid": "^9.0.1"
   }
 }

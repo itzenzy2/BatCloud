@@ -1,4 +1,4 @@
-// Personal Cloud Storage JavaScript
+// Personal Cloud Storage JavaScript with Google Drive Integration
 
 class CloudStorage {
     constructor() {
@@ -8,15 +8,79 @@ class CloudStorage {
         this.uploadQueue = [];
         this.totalStorageLimit = 0; // Will be set by backend
         this.lastUploadTime = null;
+        this.isLoading = false;
         
         this.init();
     }
 
     init() {
         this.bindEvents();
+        this.loadFiles(); // Load files from Google Drive
         this.updateStorageDisplay();
         this.renderStorageChart();
         this.updateFileStats();
+    }
+
+    async loadFiles() {
+        this.setLoading(true);
+        try {
+            const response = await fetch('/.netlify/functions/list-files');
+            if (response.ok) {
+                const data = await response.json();
+                this.files = data.files || [];
+                this.renderFileList();
+                this.updateFileStats();
+            } else {
+                this.showError('Failed to load files');
+            }
+        } catch (error) {
+            console.error('Error loading files:', error);
+            this.showError('Error connecting to cloud storage');
+        } finally {
+            this.setLoading(false);
+        }
+    }
+
+    setLoading(loading) {
+        this.isLoading = loading;
+        const loadingEl = document.querySelector('.loading-spinner');
+        const fileList = document.querySelector('.file-list');
+        
+        if (loading) {
+            if (loadingEl) loadingEl.style.display = 'flex';
+            if (fileList) fileList.style.opacity = '0.5';
+        } else {
+            if (loadingEl) loadingEl.style.display = 'none';
+            if (fileList) fileList.style.opacity = '1';
+        }
+    }
+
+    showError(message) {
+        // Create or update error notification
+        let errorEl = document.querySelector('.error-notification');
+        if (!errorEl) {
+            errorEl = document.createElement('div');
+            errorEl.className = 'error-notification';
+            document.body.appendChild(errorEl);
+        }
+        
+        errorEl.innerHTML = `
+            <div class="error-content">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>${message}</span>
+                <button onclick="this.parentElement.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
+        errorEl.style.display = 'block';
+        
+        // Auto hide after 5 seconds
+        setTimeout(() => {
+            if (errorEl.parentNode) {
+                errorEl.remove();
+            }
+        }, 5000);
     }
 
     bindEvents() {
@@ -137,8 +201,55 @@ class CloudStorage {
         files.forEach(file => {
             const queueItem = this.createQueueItem(file);
             queueList.appendChild(queueItem);
-            this.simulateUpload(file, queueItem);
+            this.uploadToGoogleDrive(file, queueItem);
         });
+    }
+
+    async uploadToGoogleDrive(file, queueItem) {
+        const progressBar = queueItem.querySelector('.progress');
+        const statusEl = queueItem.querySelector('.upload-status');
+        
+        try {
+            statusEl.textContent = 'Uploading...';
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            const response = await fetch('/.netlify/functions/upload-file', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                progressBar.style.width = '100%';
+                statusEl.textContent = 'Completed';
+                queueItem.classList.add('completed');
+                
+                // Add file to local list and refresh display
+                this.files.push(result.file);
+                this.renderFileList();
+                this.updateFileStats();
+                
+                // Remove from queue after 2 seconds
+                setTimeout(() => {
+                    queueItem.remove();
+                    if (queueList.children.length === 0) {
+                        queueContainer.style.display = 'none';
+                    }
+                }, 2000);
+                
+            } else {
+                throw new Error('Upload failed');
+            }
+            
+        } catch (error) {
+            console.error('Upload error:', error);
+            statusEl.textContent = 'Failed';
+            queueItem.classList.add('error');
+            progressBar.style.backgroundColor = '#ef4444';
+        }
+    }
     }
 
     createQueueItem(file) {
@@ -155,53 +266,6 @@ class CloudStorage {
             <span class="upload-status">Uploading...</span>
         `;
         return item;
-    }
-
-    simulateUpload(file, queueItem) {
-        const progressFill = queueItem.querySelector('.progress-fill');
-        const statusText = queueItem.querySelector('.upload-status');
-        let progress = 0;
-        
-        const interval = setInterval(() => {
-            progress += Math.random() * 15;
-            if (progress >= 100) {
-                progress = 100;
-                clearInterval(interval);
-                statusText.textContent = 'Complete';
-                statusText.style.color = 'var(--success-color)';
-                
-                // Add file to storage
-                this.addFileToStorage(file);
-            }
-            
-            progressFill.style.width = `${progress}%`;
-        }, 200);
-    }
-
-    addFileToStorage(file) {
-        const newFile = {
-            id: Date.now() + Math.random(),
-            name: file.name,
-            size: file.size,
-            type: file.type,
-            path: this.currentPath,
-            dateCreated: new Date(),
-            isFolder: false
-        };
-        
-        this.files.push(newFile);
-        this.lastUploadTime = new Date();
-        this.updateFileStats();
-        this.updateStorageDisplay();
-        this.updateRecentFiles();
-        
-        // Refresh file list if currently viewing files
-        if (document.getElementById('files').classList.contains('active')) {
-            this.renderFileList();
-        }
-        
-        // Update folder tree
-        this.updateFolderTree();
     }
 
     changeView(e) {
@@ -380,7 +444,7 @@ class CloudStorage {
         modal.classList.remove('show');
     }
 
-    createFolder() {
+    async createFolder() {
         const input = document.getElementById('folder-name-input');
         const folderName = input.value.trim();
         
@@ -389,27 +453,30 @@ class CloudStorage {
             return;
         }
         
-        if (this.files.some(file => file.name === folderName && file.path === this.currentPath)) {
+        if (this.files.some(file => file.name === folderName)) {
             alert('A folder with this name already exists');
             return;
         }
         
-        const newFolder = {
-            id: Date.now(),
-            name: folderName,
-            path: this.currentPath,
-            dateCreated: new Date(),
-            isFolder: true
-        };
-        
-        this.files.push(newFolder);
-        this.hideCreateFolderModal();
-        this.updateFileStats();
-        this.updateFolderTree();
-        
-        // Refresh current view
-        if (document.getElementById('files').classList.contains('active')) {
-            this.renderFileList();
+        try {
+            const response = await fetch('/.netlify/functions/create-folder', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ folderName })
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                this.files.push(result.folder);
+                this.hideCreateFolderModal();
+                this.renderFileList();
+                this.updateFileStats();
+            } else {
+                throw new Error('Failed to create folder');
+            }
+        } catch (error) {
+            console.error('Error creating folder:', error);
+            this.showError('Failed to create folder');
         }
     }
 
@@ -466,17 +533,32 @@ class CloudStorage {
         }
     }
 
-    deleteFile(fileName, fileItem) {
+    async deleteFile(fileName, fileItem) {
         if (confirm(`Are you sure you want to delete "${fileName}"?`)) {
-            const fileIndex = this.files.findIndex(f => f.name === fileName && f.path === this.currentPath);
-            if (fileIndex > -1) {
-                this.files.splice(fileIndex, 1);
-                fileItem.remove();
-                this.updateFileStats();
-                this.updateStorageDisplay();
-                this.updateRecentFiles();
-                this.updateFolderTree();
-                this.showNotification(`Deleted ${fileName}`, 'success');
+            const file = this.files.find(f => f.name === fileName);
+            if (!file) return;
+            
+            try {
+                const response = await fetch('/.netlify/functions/delete-file', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fileId: file.id })
+                });
+
+                if (response.ok) {
+                    const fileIndex = this.files.findIndex(f => f.id === file.id);
+                    if (fileIndex > -1) {
+                        this.files.splice(fileIndex, 1);
+                        fileItem.remove();
+                        this.updateFileStats();
+                        this.showNotification(`Deleted ${fileName}`, 'success');
+                    }
+                } else {
+                    throw new Error('Failed to delete file');
+                }
+            } catch (error) {
+                console.error('Error deleting file:', error);
+                this.showError('Failed to delete file');
             }
         }
     }

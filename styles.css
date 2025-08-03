@@ -1199,3 +1199,111 @@ input:focus-visible {
 .uploading {
     animation: pulse 1.5s ease-in-out infinite;
 }
+
+/* Loading States */
+.loading-spinner {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+    background: var(--secondary-bg);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-6);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-color);
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border-color);
+    border-top: 3px solid var(--accent-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto var(--spacing-3);
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Error Notifications */
+.error-notification {
+    position: fixed;
+    top: var(--spacing-6);
+    right: var(--spacing-6);
+    z-index: 10000;
+    background: var(--danger-color);
+    color: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    animation: slideInRight 0.3s ease-out;
+    max-width: 400px;
+}
+
+.error-content {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    padding: var(--spacing-4);
+}
+
+.error-content i {
+    font-size: var(--font-size-lg);
+    flex-shrink: 0;
+}
+
+.error-content button {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: var(--spacing-1);
+    border-radius: var(--radius-sm);
+    margin-left: auto;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.error-content button:hover {
+    opacity: 1;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Upload Queue Updates */
+.upload-status {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.queue-item.completed .upload-status {
+    color: var(--success-color);
+}
+
+.queue-item.error .upload-status {
+    color: var(--danger-color);
+}
+
+.progress {
+    background: var(--accent-color);
+    transition: width 0.3s ease;
+}
+
+/* File List Loading State */
+.file-list.loading {
+    opacity: 0.5;
+    pointer-events: none;
+}
