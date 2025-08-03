@@ -1,0 +1,10 @@
+# Clean URLs - remove .html extensions
+/dashboard    /dashboard.html    200
+/login        /index.html        200
+
+# Redirect .html files to clean URLs
+/dashboard.html    /dashboard    301!
+/index.html        /            301!
+
+# Default route
+/    /index.html    200

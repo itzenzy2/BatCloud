@@ -41,33 +41,53 @@
     </div>
 
     <script>
-        // Simple login functionality
-        document.getElementById('login-form').addEventListener('submit', function(e) {
+        document.getElementById('login-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
             const errorEl = document.getElementById('login-error');
-            
-            if (username === 'enzy' && password === '2005') {
-                // Successful login - redirect to clean URL
-                window.location.href = '/dashboard';
-            } else {
-                // Show error
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+
+            // Show a loading state on the button
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing In...';
+
+            try {
+                // Call our secure Netlify Function
+                const response = await fetch('/.netlify/functions/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (response.ok) {
+                    // If the function returns success, redirect to the dashboard
+                    window.location.href = '/dashboard';
+                } else {
+                    // If the function returns an error, show the message
+                    errorEl.style.display = 'flex';
+                    document.getElementById('username').style.borderColor = '#ef4444';
+                    document.getElementById('password').style.borderColor = '#ef4444';
+                    
+                    // Clear error after 3 seconds
+                    setTimeout(() => {
+                        errorEl.style.display = 'none';
+                        document.getElementById('username').style.borderColor = '#334155';
+                        document.getElementById('password').style.borderColor = '#334155';
+                    }, 3000);
+                    
+                    document.getElementById('password').value = '';
+                    document.getElementById('username').focus();
+                }
+            } catch (error) {
+                console.error('Login request failed:', error);
+                errorEl.textContent = 'An error occurred. Please try again.';
                 errorEl.style.display = 'flex';
-                document.getElementById('username').style.borderColor = '#ef4444';
-                document.getElementById('password').style.borderColor = '#ef4444';
-                
-                // Clear error after 3 seconds
-                setTimeout(() => {
-                    errorEl.style.display = 'none';
-                    document.getElementById('username').style.borderColor = '#334155';
-                    document.getElementById('password').style.borderColor = '#334155';
-                }, 3000);
-                
-                // Clear password field and focus username
-                document.getElementById('password').value = '';
-                document.getElementById('username').focus();
+            } finally {
+                // Restore the button's original state
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In';
             }
         });
     </script>
