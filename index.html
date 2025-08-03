@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BatCloud</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-cloud"></i>
+                <span>BatCloud</span>
+            </div>
+            <div class="user-menu">
+                <div class="storage-indicator">
+                    <span class="storage-text">Storage: <span id="storage-used">--</span> / <span id="storage-total">--</span></span>
+                    <div class="storage-bar">
+                        <div class="storage-fill" id="storage-fill"></div>
+                    </div>
+                </div>
+                <div class="user-profile">
+                    <i class="fas fa-user-circle"></i>
+                    <span>User</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <nav class="nav-menu">
+                <ul>
+                    <li class="nav-item active" data-section="dashboard">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </li>
+                    <li class="nav-item" data-section="files">
+                        <i class="fas fa-folder"></i>
+                        <span>Files</span>
+                    </li>
+                    <li class="nav-item" data-section="upload">
+                        <i class="fas fa-upload"></i>
+                        <span>Upload</span>
+                    </li>
+                    <li class="nav-item" data-section="folders">
+                        <i class="fas fa-folder-plus"></i>
+                        <span>Folders</span>
+                    </li>
+                    <li class="nav-item" data-section="storage">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>Storage</span>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="content-section active">
+                <div class="section-header">
+                    <h1>Dashboard</h1>
+                    <p>Welcome to BatCloud - your personal cloud storage</p>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="stats-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-file"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Total Files</h3>
+                            <span class="stat-number" id="total-files">0</span>
+                        </div>
+                    </div>
+
+                    <div class="stats-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-folder"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Total Folders</h3>
+                            <span class="stat-number" id="total-folders">0</span>
+                        </div>
+                    </div>
+
+                    <div class="stats-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-hdd"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Storage Used</h3>
+                            <span class="stat-number" id="storage-used-display">0 B</span>
+                        </div>
+                    </div>
+
+                    <div class="stats-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Last Upload</h3>
+                            <span class="stat-number" id="last-upload">Never</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recent-files">
+                    <h2>Recent Files</h2>
+                    <div class="file-grid" id="recent-files-grid">
+                        <div class="empty-state">
+                            <i class="fas fa-folder-open"></i>
+                            <p>No files uploaded yet</p>
+                            <button class="btn btn-primary" onclick="document.querySelector('[data-section=upload]').click()">
+                                <i class="fas fa-upload"></i>
+                                Upload Your First File
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Files Section -->
+            <section id="files" class="content-section">
+                <div class="section-header">
+                    <h1>File Browser</h1>
+                    <div class="file-actions">
+                        <button class="btn btn-primary" id="new-folder-btn">
+                            <i class="fas fa-folder-plus"></i>
+                            New Folder
+                        </button>
+                        <button class="btn btn-secondary" id="upload-files-btn">
+                            <i class="fas fa-upload"></i>
+                            Upload Files
+                        </button>
+                    </div>
+                </div>
+
+                <div class="breadcrumb">
+                    <span class="breadcrumb-item active">Root</span>
+                </div>
+
+                <div class="file-browser">
+                    <div class="file-browser-header">
+                        <div class="view-controls">
+                            <button class="view-btn active" data-view="grid">
+                                <i class="fas fa-th"></i>
+                            </button>
+                            <button class="view-btn" data-view="list">
+                                <i class="fas fa-list"></i>
+                            </button>
+                        </div>
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" placeholder="Search files..." id="file-search">
+                        </div>
+                    </div>
+
+                    <div class="file-list" id="file-list">
+                        <div class="empty-state">
+                            <i class="fas fa-folder-open"></i>
+                            <p>No files or folders yet</p>
+                            <div class="empty-actions">
+                                <button class="btn btn-primary" id="upload-first-file">
+                                    <i class="fas fa-upload"></i>
+                                    Upload Files
+                                </button>
+                                <button class="btn btn-secondary" id="create-first-folder">
+                                    <i class="fas fa-folder-plus"></i>
+                                    Create Folder
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Upload Section -->
+            <section id="upload" class="content-section">
+                <div class="section-header">
+                    <h1>Upload Files</h1>
+                    <p>Drag and drop files or click to browse</p>
+                </div>
+
+                <div class="upload-area" id="upload-area">
+                    <div class="upload-content">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h3>Drop files here to upload</h3>
+                        <p>or</p>
+                        <button class="btn btn-primary" id="browse-files">Browse Files</button>
+                        <input type="file" id="file-input" multiple hidden>
+                    </div>
+                </div>
+
+                <div class="upload-queue" id="upload-queue" style="display: none;">
+                    <h3>Upload Queue</h3>
+                    <div class="queue-list" id="queue-list"></div>
+                </div>
+            </section>
+
+            <!-- Folders Section -->
+            <section id="folders" class="content-section">
+                <div class="section-header">
+                    <h1>Folder Management</h1>
+                    <button class="btn btn-primary" id="create-folder-btn">
+                        <i class="fas fa-plus"></i>
+                        Create New Folder
+                    </button>
+                </div>
+
+                <div class="folder-tree">
+                    <div class="tree-item">
+                        <div class="tree-node">
+                            <i class="fas fa-folder-open"></i>
+                            <span>Root</span>
+                        </div>
+                        <div class="tree-children" id="folder-tree-content">
+                            <div class="empty-state">
+                                <i class="fas fa-folder"></i>
+                                <p>No folders created yet</p>
+                                <button class="btn btn-primary" id="create-folder-from-tree">
+                                    <i class="fas fa-plus"></i>
+                                    Create Your First Folder
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Storage Section -->
+            <section id="storage" class="content-section">
+                <div class="section-header">
+                    <h1>Storage Usage</h1>
+                    <p>Monitor your storage consumption</p>
+                </div>
+
+                <div class="storage-overview">
+                    <div class="storage-chart">
+                        <div class="chart-container">
+                            <canvas id="storage-chart" width="300" height="300"></canvas>
+                        </div>
+                        <div class="chart-legend">
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #3b82f6;"></div>
+                                <span id="docs-legend">Documents (0%)</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #10b981;"></div>
+                                <span id="images-legend">Images (0%)</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #f59e0b;"></div>
+                                <span id="videos-legend">Videos (0%)</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #ef4444;"></div>
+                                <span id="other-legend">Other (0%)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="storage-details">
+                        <h3>Storage Breakdown</h3>
+                        <div class="storage-item">
+                            <span>Documents</span>
+                            <span id="docs-size">0 B</span>
+                        </div>
+                        <div class="storage-item">
+                            <span>Images</span>
+                            <span id="images-size">0 B</span>
+                        </div>
+                        <div class="storage-item">
+                            <span>Videos</span>
+                            <span id="videos-size">0 B</span>
+                        </div>
+                        <div class="storage-item">
+                            <span>Other</span>
+                            <span id="other-size">0 B</span>
+                        </div>
+                        <div class="storage-item total">
+                            <span>Total Used</span>
+                            <span id="total-used">0 B</span>
+                        </div>
+                        <div class="storage-item">
+                            <span>Available</span>
+                            <span id="available-storage">-- GB</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" id="create-folder-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Create New Folder</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" placeholder="Folder name" id="folder-name-input">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancel-folder">Cancel</button>
+                <button class="btn btn-primary" id="confirm-folder">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
