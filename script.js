@@ -1,138 +1,5 @@
 // Personal Cloud Storage JavaScript
 
-// Login functionality
-class LoginManager {
-    constructor() {
-        this.isLoggedIn = false;
-        this.validCredentials = {
-            username: 'enzy',
-            password: '2005'
-        };
-        this.init();
-    }
-
-    init() {
-        this.bindLoginEvents();
-        this.checkLoginStatus();
-    }
-
-    bindLoginEvents() {
-        const loginForm = document.getElementById('login-form');
-        if (loginForm) {
-            loginForm.addEventListener('submit', (e) => this.handleLogin(e));
-        }
-        
-        const clearSessionBtn = document.getElementById('clear-session-btn');
-        if (clearSessionBtn) {
-            clearSessionBtn.addEventListener('click', () => this.clearSession());
-        }
-    }
-
-    handleLogin(e) {
-        e.preventDefault();
-        
-        const username = document.getElementById('username').value.trim();
-        const password = document.getElementById('password').value;
-        const errorEl = document.getElementById('login-error');
-        
-        if (username === this.validCredentials.username && password === this.validCredentials.password) {
-            this.login();
-        } else {
-            this.showLoginError();
-        }
-    }
-
-    login() {
-        this.isLoggedIn = true;
-        localStorage.setItem('batcloud_logged_in', 'true');
-        
-        const loginContainer = document.getElementById('login-container');
-        const appContainer = document.getElementById('app-container');
-        
-        // Hide login page
-        loginContainer.classList.add('hide');
-        loginContainer.style.display = 'none';
-        
-        // Show main application
-        appContainer.style.display = 'block';
-        setTimeout(() => {
-            appContainer.classList.add('show');
-        }, 100);
-        
-        // Initialize the main application
-        if (window.cloudStorage) {
-            window.cloudStorage.init();
-        } else {
-            // Initialize CloudStorage if not already done
-            window.cloudStorage = new CloudStorage();
-        }
-    }
-
-    showLoginError() {
-        const errorEl = document.getElementById('login-error');
-        const usernameInput = document.getElementById('username');
-        const passwordInput = document.getElementById('password');
-        
-        errorEl.style.display = 'flex';
-        usernameInput.style.borderColor = 'var(--danger-color)';
-        passwordInput.style.borderColor = 'var(--danger-color)';
-        
-        // Clear error after 3 seconds
-        setTimeout(() => {
-            errorEl.style.display = 'none';
-            usernameInput.style.borderColor = 'var(--border-color)';
-            passwordInput.style.borderColor = 'var(--border-color)';
-        }, 3000);
-        
-        // Clear password field
-        passwordInput.value = '';
-        passwordInput.focus();
-    }
-
-    checkLoginStatus() {
-        const isLoggedIn = localStorage.getItem('batcloud_logged_in') === 'true';
-        
-        if (isLoggedIn) {
-            this.login();
-        }
-    }
-
-    logout() {
-        this.isLoggedIn = false;
-        localStorage.removeItem('batcloud_logged_in');
-        
-        const loginContainer = document.getElementById('login-container');
-        const appContainer = document.getElementById('app-container');
-        
-        // Show login page
-        loginContainer.classList.remove('hide');
-        loginContainer.style.display = 'flex';
-        
-        // Hide main application
-        appContainer.classList.remove('show');
-        setTimeout(() => {
-            appContainer.style.display = 'none';
-        }, 300);
-        
-        // Clear login form
-        document.getElementById('username').value = '';
-        document.getElementById('password').value = '';
-        
-        // Reset any application state
-        if (window.cloudStorage) {
-            window.cloudStorage.files = [];
-            window.cloudStorage.currentPath = '/';
-            window.cloudStorage.uploadQueue = [];
-        }
-    }
-
-    clearSession() {
-        localStorage.removeItem('batcloud_logged_in');
-        alert('Session cleared! The page will reload.');
-        location.reload();
-    }
-}
-
 class CloudStorage {
     constructor() {
         this.currentPath = '/';
@@ -196,11 +63,9 @@ class CloudStorage {
         document.getElementById('upload-files-btn')?.addEventListener('click', () => this.switchToSection('upload'));
         document.getElementById('upload-first-file')?.addEventListener('click', () => this.switchToSection('upload'));
         
-        // Logout functionality
+        // Logout functionality - redirect to login page
         document.getElementById('logout-btn')?.addEventListener('click', () => {
-            if (window.loginManager) {
-                window.loginManager.logout();
-            }
+            window.location.href = 'login.html';
         });
     }
 
@@ -967,10 +832,8 @@ class CloudStorage {
 
 // Initialize the application when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialize login manager first
-    window.loginManager = new LoginManager();
-    
-    // CloudStorage will be initialized after successful login
+    // Initialize the cloud storage application directly
+    new CloudStorage();
 });
 
 // Service Worker Registration (for PWA capabilities)

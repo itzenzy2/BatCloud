@@ -8,45 +8,6 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <!-- Login Page -->
-    <div class="login-container" id="login-container">
-        <div class="login-form">
-            <div class="login-header">
-                <div class="login-logo">
-                    <i class="fas fa-cloud"></i>
-                    <span>BatCloud</span>
-                </div>
-                <h2>Welcome Back</h2>
-                <p>Sign in to access your cloud storage</p>
-            </div>
-            <form id="login-form">
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" name="username" required>
-                </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" required>
-                </div>
-                <button type="submit" class="btn btn-primary login-btn">
-                    <i class="fas fa-sign-in-alt"></i>
-                    Sign In
-                </button>
-                <div class="login-error" id="login-error" style="display: none;">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    Invalid username or password
-                </div>
-                <div class="login-footer">
-                    <button type="button" class="clear-session-btn" id="clear-session-btn">
-                        Clear Session
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Main Application (hidden initially) -->
-    <div class="app-container" id="app-container" style="display: none;">
     <!-- Header -->
     <header class="header">
         <div class="header-content">
@@ -359,8 +320,6 @@
             </div>
         </div>
     </div>
-
-    </div> <!-- End of app-container -->
 
     <script src="script.js"></script>
 </body>
