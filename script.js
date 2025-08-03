@@ -65,7 +65,7 @@ class CloudStorage {
         
         // Logout functionality - redirect to login page
         document.getElementById('logout-btn')?.addEventListener('click', () => {
-            window.location.href = 'index.html';
+            window.location.href = '/';
         });
     }
 

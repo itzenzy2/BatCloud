@@ -50,8 +50,8 @@
             const errorEl = document.getElementById('login-error');
             
             if (username === 'enzy' && password === '2005') {
-                // Successful login - redirect to main app
-                window.location.href = 'dashboard.html';
+                // Successful login - redirect to clean URL
+                window.location.href = '/dashboard';
             } else {
                 // Show error
                 errorEl.style.display = 'flex';
