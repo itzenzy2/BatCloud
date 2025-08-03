@@ -232,6 +232,8 @@ class CloudStorage {
                 this.updateFileStats();
                 
                 // Remove from queue after 2 seconds
+                const queueList = document.getElementById('queue-list');
+                const queueContainer = document.getElementById('upload-queue');
                 setTimeout(() => {
                     queueItem.remove();
                     if (queueList.children.length === 0) {
@@ -240,6 +242,8 @@ class CloudStorage {
                 }, 2000);
                 
             } else {
+                const error = await response.text();
+                console.error('Upload failed:', error);
                 throw new Error('Upload failed');
             }
             
@@ -261,9 +265,9 @@ class CloudStorage {
                 <div class="file-size">${this.formatFileSize(file.size)}</div>
             </div>
             <div class="progress-bar">
-                <div class="progress-fill" style="width: 0%"></div>
+                <div class="progress" style="width: 0%"></div>
             </div>
-            <span class="upload-status">Uploading...</span>
+            <span class="upload-status">Preparing...</span>
         `;
         return item;
     }

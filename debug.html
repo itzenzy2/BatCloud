@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BatCloud - Debug</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 50px auto; 
+            padding: 20px;
+            background: #1a1f29;
+            color: white;
+        }
+        .test-section { 
+            margin: 20px 0; 
+            padding: 20px; 
+            border: 1px solid #334155; 
+            border-radius: 8px;
+            background: #0f1419;
+        }
+        button { 
+            background: #3b82f6; 
+            color: white; 
+            border: none; 
+            padding: 10px 20px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            margin: 5px;
+        }
+        pre { 
+            background: #252b37; 
+            padding: 10px; 
+            border-radius: 4px; 
+            overflow-x: auto;
+        }
+        .error { color: #ef4444; }
+        .success { color: #10b981; }
+    </style>
+</head>
+<body>
+    <h1>BatCloud Backend Debug</h1>
+    
+    <div class="test-section">
+        <h2>1. Test Authentication</h2>
+        <button onclick="testLogin()">Test Login Function</button>
+        <pre id="login-result"></pre>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. Test File Listing</h2>
+        <button onclick="testListFiles()">Test List Files Function</button>
+        <pre id="files-result"></pre>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Test File Upload</h2>
+        <input type="file" id="test-file" />
+        <button onclick="testUpload()">Test Upload Function</button>
+        <pre id="upload-result"></pre>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. Test Folder Creation</h2>
+        <input type="text" id="folder-name" placeholder="Enter folder name" value="test-folder" />
+        <button onclick="testCreateFolder()">Test Create Folder Function</button>
+        <pre id="folder-result"></pre>
+    </div>
+
+    <script>
+        function log(elementId, message, isError = false) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<span class="${isError ? 'error' : 'success'}">${message}</span>`;
+        }
+
+        async function testLogin() {
+            try {
+                log('login-result', 'Testing login...');
+                const response = await fetch('/.netlify/functions/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: 'enzy', password: '2005' })
+                });
+                
+                const result = await response.text();
+                log('login-result', `Status: ${response.status}\nResponse: ${result}`, !response.ok);
+            } catch (error) {
+                log('login-result', `Error: ${error.message}`, true);
+            }
+        }
+
+        async function testListFiles() {
+            try {
+                log('files-result', 'Testing file listing...');
+                const response = await fetch('/.netlify/functions/list-files');
+                const result = await response.text();
+                log('files-result', `Status: ${response.status}\nResponse: ${result}`, !response.ok);
+            } catch (error) {
+                log('files-result', `Error: ${error.message}`, true);
+            }
+        }
+
+        async function testUpload() {
+            const fileInput = document.getElementById('test-file');
+            if (!fileInput.files[0]) {
+                log('upload-result', 'Please select a file first', true);
+                return;
+            }
+
+            try {
+                log('upload-result', 'Testing file upload...');
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+                
+                const response = await fetch('/.netlify/functions/upload-file', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.text();
+                log('upload-result', `Status: ${response.status}\nResponse: ${result}`, !response.ok);
+            } catch (error) {
+                log('upload-result', `Error: ${error.message}`, true);
+            }
+        }
+
+        async function testCreateFolder() {
+            const folderName = document.getElementById('folder-name').value;
+            if (!folderName) {
+                log('folder-result', 'Please enter a folder name', true);
+                return;
+            }
+
+            try {
+                log('folder-result', 'Testing folder creation...');
+                const response = await fetch('/.netlify/functions/create-folder', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ folderName })
+                });
+                
+                const result = await response.text();
+                log('folder-result', `Status: ${response.status}\nResponse: ${result}`, !response.ok);
+            } catch (error) {
+                log('folder-result', `Error: ${error.message}`, true);
+            }
+        }
+    </script>
+</body>
+</html>
