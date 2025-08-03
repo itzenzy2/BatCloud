@@ -1,8 +1,8 @@
-// Service Worker for Personal Cloud Storage
-const CACHE_NAME = 'cloud-storage-v1';
+// Service Worker for BatCloud
+const CACHE_NAME = 'batcloud-v1';
 const urlsToCache = [
     '/',
-    '/index.html',
+    '/dashboard',
     '/styles.css',
     '/script.js',
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'
